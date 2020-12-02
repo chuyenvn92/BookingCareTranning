@@ -44,8 +44,18 @@ class BenhvienController extends CController {
     }
 
     public function actionBenhvien() {
+        $page = isset($_GET['page']) ? $_GET['page'] : 1;
+        $limit = isset($_GET['limit']) ? $_GET['limit'] : 5;
+        $offset = ($page - 1) * $limit;
 
-        $bv = Benhvien::model()->findAll();
+        $cond = new CDbCriteria();
+        $cond->limit = $limit;
+        $cond->offset = $offset;
+        $cond->order = 'id DESC';
+        $bv = Benhvien::model()->findAll($cond);
+        $count = Benhvien::model()->count();
+        $numOfPage = ($count%10) ? ($count/10+1) : $count/10;
+        $numOfRec = $this->modelName::model()->count();
         foreach ($bv as $item) {
             $data[] = array(
                 'id' => $item->id,
@@ -54,8 +64,8 @@ class BenhvienController extends CController {
                 'gioithieu' => $item->gioithieu
             );
         }
-
-        $this->renderJson(200, "Thành công", $data);
+        $value = array('data' => $data, 'page' => $page, 'offset' => $offset, 'numOfPages' => $numOfPage, 'total' => $numOfRec);
+        $this->renderJson(200, "Thành công", $value);
     }
 
     public function actionSearch() {

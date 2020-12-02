@@ -1,9 +1,14 @@
 <div id="app">
     <input type="hidden" name="edit_id" value="<?php echo filter_input(INPUT_GET, 'id') ?>" />
     <h1 class="mt-4">Quản lý Bệnh viện</h1>
-    <div class="alert alert-success" v-if="new_response">
-        {{new_response.message}}
-    </div>
+    <template v-for="alert in alerts">
+        <div class="alert alert-success alert-dismissible fade show" role="alert" v-if="alert">
+            {{alert}}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    </template>
     <button v-on:click="addHospital()" class="btn btn-primary mb-4 ml-4">
         <i class="fas fa-plus mr-1"></i>Thêm mới
     </button>
@@ -31,6 +36,10 @@
                         </tr>
                     </tbody>
                 </table>
+                <div class="text-center">
+                    <button class="btn btn-primary ml-1" v-for="page in pageList" v-on:click="getHospital(page)">{{page}}</button>
+                </div>
+
             </div>
         </div>
     </div>
@@ -133,13 +142,28 @@
         data: {
             hospitals: [],
             hospital: {},
-            new_response: ''
+            pageList: [],
+            limit: 5,
+            current_page: 1,
+            new_response: '',
+            alerts: []
         },
         methods: {
-            getHospital: function(){
+            getHospital: function(page = false){
                 var that = this;
-                $.get("<?php echo $this->createUrl("benhvien") ?>", function(res){
-                    that.hospitals = res.data;
+                if (page){
+                    that.current_page = page;
+                }
+                $.get("<?php echo $this->createUrl("benhvien") ?>",{
+                    page: that.current_page,
+                    limit: that.limit,
+                }, function(res){
+                    that.hospitals = res.data['data'];
+                    var page_number = Math.ceil(res.data['total'] / that.limit);
+                    that.pageList = [];
+                    for (var i = 1; i<= page_number; i++){
+                        that.pageList.push(i);
+                    }
                 });
             },
             addHospital(){
@@ -158,7 +182,8 @@
                 var that = this;
                 var action = $('#editHospitalForm').attr('data-action');    
                 $.post(action, this.hospital, function(response){
-                    that.new_response = response;
+                    that.alerts = [];
+                    that.alerts.push(response.message);
                     if(response.code === 200)
                         {
                             $('#editHospitalModal').modal('hide');
@@ -174,7 +199,8 @@
                 var that = this;
                 var action = $('#deleteHospitalForm').attr('data-action');
                 $.post(action, this.hospital, function(res){
-                    that.new_response = res;
+                    that.alerts = [];
+                    that.alerts.push(res.message);
                     if(res.code === 200)
                     {
                         $('#deleteHospitalModal').modal('hide');
@@ -196,7 +222,8 @@
                       data: data
                     })
                       .done(function( response ) {
-                        that.new_response = response;
+                        that.alerts = [];
+                        that.alerts.push(response.message);
                 
                         if(response.code === 200)
                             {
@@ -210,7 +237,7 @@
             }
 //            getId: function(){
 //            var that = this;
-//            $.get("<?php // echo $this->createUrl("getid")      ?>" , function(res){
+//            $.get("<?php // echo $this->createUrl("getid")            ?>" , function(res){
 //            that.hospitals = res.data;
 //                });
 //            },
@@ -237,5 +264,5 @@
 //            },
         }
     });
-    app.getHospital();
+    app.getHospital(1);
 </script>

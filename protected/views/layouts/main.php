@@ -7,6 +7,7 @@
         <meta name="description" content="" />
         <meta name="author" content="" />
         <title>Quản lí</title>
+        <link rel="shortcut icon" type="text/html" href="<?php echo Yii::app()->request->baseUrl; ?>/favicon.png"/>
         <link href="<?php echo Yii::app()->request->baseUrl; ?>/css/styles.css" rel="stylesheet" type="text/css" />
         <script src="<?php echo Yii::app()->request->baseUrl; ?>/js/vue.js"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
